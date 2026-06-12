@@ -1,4 +1,4 @@
- # missing_values_analyzer.py
+# missing_values_analyzer.py
 import pandas as pd
 from rich.console import Console
 from rich.table import Table
@@ -7,7 +7,8 @@ from rich.box import ROUNDED
 class MissingValuesAnalyzer:
     """
     Class to analyze and report missing values in a dataset.
-    Colors are neutral and natural (grey, beige, etc.).
+    Uses a cohesive amber/orange-based color palette to represent
+    severity levels of missing data (low -> medium -> high).
     """
 
     def __init__(self, data: pd.DataFrame):
@@ -20,11 +21,15 @@ class MissingValuesAnalyzer:
         self.data = data
         self.console = Console()
 
-        # Neutral and natural color theme
-        self.color_header = "#4F4F4F"      # Dark Gray
-        self.color_high = "#8B0000"        # DarkRed (for high missing)
-        self.color_medium = "#A0522D"      # Sienna (for medium missing)
-        self.color_low = "#D3D3D3"         # LightGray (for low missing)
+        # Cohesive color theme (warm amber/orange family for "missingness")
+        self.color_header = "#2E4057"      # Deep slate blue (headers/titles)
+        self.color_high = "#D72631"        # Strong red (high severity, >20%)
+        self.color_medium = "#F39C12"      # Amber/orange (medium severity, 5-20%)
+        self.color_low = "#F7DC6F"         # Soft yellow (low severity, <5%)
+        self.color_good = "#27AE60"        # Green (no issues / good status)
+
+        # Threshold for flagging rows as candidates for removal
+        self.row_missing_threshold = 3
 
     def get_missing_summary(self) -> pd.DataFrame:
         """
@@ -121,6 +126,24 @@ class MissingValuesAnalyzer:
         })
         return summary_by_row.sort_values('Missing_Count', ascending=False)
 
+    def get_rows_above_threshold(self, threshold: int = None) -> pd.DataFrame:
+        """
+        Get rows whose missing-value count is >= threshold.
+        These are candidate rows for removal.
+
+        Args:
+            threshold: Minimum number of missing values to flag a row.
+                       Defaults to self.row_missing_threshold (3).
+
+        Returns:
+            DataFrame of flagged rows, sorted by missing count (desc).
+        """
+        if threshold is None:
+            threshold = self.row_missing_threshold
+
+        missing_by_row = self.get_missing_by_row()
+        return missing_by_row[missing_by_row['Missing_Count'] >= threshold]
+
     def display_detailed_report(self):
         """
         Display detailed report of missing values using Rich library.
@@ -139,7 +162,7 @@ class MissingValuesAnalyzer:
             self._display_column_missing_table(summary_df)
             self._display_recommendations(summary_df)
         else:
-            self.console.print(f"\n[green]✓ Excellent! No missing values found in the dataset![/green]")
+            self.console.print(f"\n[{self.color_good}]✓ Excellent! No missing values found in the dataset![/{self.color_good}]")
 
         if total_missing > 0:
             self._display_row_missing_info()
@@ -187,26 +210,24 @@ class MissingValuesAnalyzer:
             missing_pct = row['Missing_Percentage']
             if missing_pct > 20:
                 color = self.color_high
-                pct_color = "red"
             elif missing_pct > 5:
                 color = self.color_medium
-                pct_color = "yellow"
             else:
                 color = self.color_low
-                pct_color = "white"
 
             column_table.add_row(
                 f"[{color}]{row['Column']}[/{color}]",
                 row['Data_Type'],
                 f"[{color}]{int(row['Missing_Count']):,}[/{color}]",
-                f"[{pct_color}]{row['Missing_Percentage']:.2f}%[/{pct_color}]",
+                f"[{color}]{row['Missing_Percentage']:.2f}%[/{color}]",
                 f"{int(row['Non_Missing_Count']):,}"
             )
         self.console.print(column_table)
 
     def _display_recommendations(self, summary_df: pd.DataFrame):
         """
-        Display recommendations for handling missing values.
+        Display professional, statistically-grounded recommendations
+        for handling missing values, tailored to severity and data type.
         """
         recommendations_table = Table(
             title="💡 Recommendations",
@@ -216,35 +237,55 @@ class MissingValuesAnalyzer:
         )
         recommendations_table.add_column("Column", justify="left")
         recommendations_table.add_column("Missing %", justify="center")
+        recommendations_table.add_column("Severity", justify="center")
         recommendations_table.add_column("Recommended Action", justify="left")
 
         for _, row in summary_df.iterrows():
             if row['Missing_Percentage'] > 0:
                 missing_pct = row['Missing_Percentage']
+                dtype = row['Data_Type']
+
                 if missing_pct > 50:
-                    action = "❌ Consider dropping this column"
+                    severity = f"[{self.color_high}]Critical[/{self.color_high}]"
+                    action = ("Drop column or treat as MNAR; if domain-critical, "
+                              "consider a 'missing' indicator flag and model-based imputation (e.g., MICE)")
                 elif missing_pct > 20:
-                    action = "⚠️ Consider dropping or imputing with advanced methods"
-                elif missing_pct > 5:
-                    if row['Data_Type'] == 'Numeric':
-                        action = "📊 Impute with mean/median"
+                    severity = f"[{self.color_high}]High[/{self.color_high}]"
+                    if dtype == 'Numeric':
+                        action = ("Use multiple imputation (MICE) or KNN imputation; "
+                                  "add a missingness indicator column before modeling")
                     else:
-                        action = "🏷️ Impute with mode or 'Unknown'"
+                        action = ("Impute with mode, a dedicated 'Unknown' category, "
+                                  "or model-based imputation; add a missingness indicator")
+                elif missing_pct > 5:
+                    severity = f"[{self.color_medium}]Moderate[/{self.color_medium}]"
+                    if dtype == 'Numeric':
+                        action = "Impute with median (robust to outliers) or use regression imputation"
+                    elif dtype in ('DateTime',):
+                        action = "Impute via forward/backward fill or interpolation based on time order"
+                    else:
+                        action = "Impute with mode or most frequent category; review for systematic patterns"
                 else:
-                    action = "✓ Impute or drop rows (low impact)"
+                    severity = f"[{self.color_low}]Low[/{self.color_low}]"
+                    action = "Low impact: impute with mean/median/mode or drop affected rows safely"
 
                 recommendations_table.add_row(
                     row['Column'],
                     f"{row['Missing_Percentage']:.1f}%",
+                    severity,
                     action
                 )
         self.console.print(recommendations_table)
 
     def _display_row_missing_info(self):
         """
-        Display information about rows with missing values.
+        Display information about rows with missing values, and flag
+        rows that meet/exceed the row_missing_threshold (default: 3)
+        as candidates for removal.
         """
         missing_by_row = self.get_missing_by_row()
+        flagged_rows = self.get_rows_above_threshold()
+
         if len(missing_by_row) > 0:
             row_table = Table(
                 title="📊 Rows with Missing Values",
@@ -255,29 +296,47 @@ class MissingValuesAnalyzer:
             row_table.add_column("Row Index", justify="center")
             row_table.add_column("Missing Count", justify="center")
             row_table.add_column("Missing Percentage", justify="center")
-            row_table.add_column("Recommendation", justify="left")
+            row_table.add_column("Suggested Action", justify="left")
 
             for _, row in missing_by_row.head(10).iterrows():
-                if row['Missing_Percentage'] > 50:
-                    rec = "Consider dropping this row"
-                    color = "red"
+                if row['Missing_Count'] >= self.row_missing_threshold:
+                    rec = f"⚠️ ≥{self.row_missing_threshold} missing — candidate for removal"
+                    color = self.color_high
                 elif row['Missing_Percentage'] > 20:
                     rec = "Impute values"
-                    color = "yellow"
+                    color = self.color_medium
                 else:
                     rec = "Impute or keep"
-                    color = "white"
+                    color = self.color_low
 
                 row_table.add_row(
                     str(row['Row_Index']),
                     f"[{color}]{int(row['Missing_Count'])}[/{color}]",
                     f"{row['Missing_Percentage']:.1f}%",
-                    rec
+                    f"[{color}]{rec}[/{color}]"
                 )
 
             if len(missing_by_row) > 10:
                 row_table.caption = f"Showing top 10 rows out of {len(missing_by_row)} rows with missing values"
             self.console.print(row_table)
+
+        # Summary block: count of rows that meet/exceed threshold
+        n_flagged = len(flagged_rows)
+        if n_flagged > 0:
+            pct_flagged = (n_flagged / len(self.data)) * 100
+            self.console.print(
+                f"\n[bold {self.color_high}]🗑️  {n_flagged:,} row(s) ({pct_flagged:.2f}% of dataset) "
+                f"have {self.row_missing_threshold}+ missing values.[/bold {self.color_high}]"
+            )
+            self.console.print(
+                f"[{self.color_medium}]   Decide whether to drop these rows: "
+                f"`df.drop(index=analyzer.get_rows_above_threshold()['Row_Index'])`[/{self.color_medium}]"
+            )
+        else:
+            self.console.print(
+                f"\n[{self.color_good}]✓ No rows have {self.row_missing_threshold}+ missing values "
+                f"(no removal candidates by row-count rule).[/{self.color_good}]"
+            )
 
     def export_report_to_csv(self, filename: str = "missing_values_report.csv"):
         """
@@ -285,7 +344,7 @@ class MissingValuesAnalyzer:
         """
         summary_df = self.get_missing_summary()
         summary_df.to_csv(filename, index=False)
-        self.console.print(f"\n[green]✓ Report exported to '{filename}'[/green]")
+        self.console.print(f"\n[{self.color_good}]✓ Report exported to '{filename}'[/{self.color_good}]")
 
     def get_simple_text_report(self) -> str:
         """
@@ -313,6 +372,12 @@ class MissingValuesAnalyzer:
                 report.append(f"  - {row['Column']}: {int(row['Missing_Count']):,} missing ({row['Missing_Percentage']:.2f}%)")
         else:
             report.append("\n✓ No missing values found!")
+
+        flagged_rows = self.get_rows_above_threshold()
+        if len(flagged_rows) > 0:
+            pct_flagged = (len(flagged_rows) / len(self.data)) * 100
+            report.append(f"\nRows with {self.row_missing_threshold}+ missing values: "
+                           f"{len(flagged_rows):,} ({pct_flagged:.2f}% of dataset) — review for removal")
 
         report.append("\n" + "=" * 60)
         return "\n".join(report)
