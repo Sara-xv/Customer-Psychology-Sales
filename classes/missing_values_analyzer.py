@@ -279,46 +279,10 @@ class MissingValuesAnalyzer:
 
     def _display_row_missing_info(self):
         """
-        Display information about rows with missing values, and flag
-        rows that meet/exceed the row_missing_threshold (default: 3)
-        as candidates for removal.
+        Display summary of rows that meet/exceed the row_missing_threshold
+        (default: 3) as candidates for removal.
         """
-        missing_by_row = self.get_missing_by_row()
         flagged_rows = self.get_rows_above_threshold()
-
-        if len(missing_by_row) > 0:
-            row_table = Table(
-                title="📊 Rows with Missing Values",
-                title_style=f"bold {self.color_header}",
-                box=ROUNDED,
-                header_style=f"bold {self.color_header}"
-            )
-            row_table.add_column("Row Index", justify="center")
-            row_table.add_column("Missing Count", justify="center")
-            row_table.add_column("Missing Percentage", justify="center")
-            row_table.add_column("Suggested Action", justify="left")
-
-            for _, row in missing_by_row.head(10).iterrows():
-                if row['Missing_Count'] >= self.row_missing_threshold:
-                    rec = f"⚠️ ≥{self.row_missing_threshold} missing — candidate for removal"
-                    color = self.color_high
-                elif row['Missing_Percentage'] > 20:
-                    rec = "Impute values"
-                    color = self.color_medium
-                else:
-                    rec = "Impute or keep"
-                    color = self.color_low
-
-                row_table.add_row(
-                    str(row['Row_Index']),
-                    f"[{color}]{int(row['Missing_Count'])}[/{color}]",
-                    f"{row['Missing_Percentage']:.1f}%",
-                    f"[{color}]{rec}[/{color}]"
-                )
-
-            if len(missing_by_row) > 10:
-                row_table.caption = f"Showing top 10 rows out of {len(missing_by_row)} rows with missing values"
-            self.console.print(row_table)
 
         # Summary block: count of rows that meet/exceed threshold
         n_flagged = len(flagged_rows)
