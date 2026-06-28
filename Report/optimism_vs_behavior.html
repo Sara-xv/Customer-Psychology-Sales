@@ -19,19 +19,20 @@ body {
 </head>
 <body>
     <pre style="font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><code style="font-family:inherit"><span class="r1">╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
-<span class="r1">│</span>  <span class="r2">Optimism vs. Loyalty &amp; Campaign Response</span>                                                                                                <span class="r1">│</span>
+<span class="r1">│</span>  <span class="r2">Optimism vs. Purchase &amp; Loyalty</span>                                                                                                         <span class="r1">│</span>
 <span class="r1">╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
-<span class="r2">                        Optimism Bucket vs. Behavior Metrics                        </span>
-<span class="r1">╭─────────────────┬───────────┬───────┬────────────────────┬───────────────────────╮</span>
-<span class="r1">│</span><span class="r3"> Optimism Bucket </span><span class="r1">│</span><span class="r3"> Customers </span><span class="r1">│</span><span class="r3"> Share </span><span class="r1">│</span><span class="r3"> Avg Loyalty Points </span><span class="r1">│</span><span class="r3"> Avg Campaign Exposure </span><span class="r1">│</span>
-<span class="r1">├─────────────────┼───────────┼───────┼────────────────────┼───────────────────────┤</span>
-<span class="r1">│</span><span class="r4"> Low             </span><span class="r1">│</span><span class="r5">    54,899 </span><span class="r1">│</span><span class="r5"> 10.0% </span><span class="r1">│</span><span class="r5">             113.06 </span><span class="r1">│</span><span class="r5">                  8.50 </span><span class="r1">│</span>
-<span class="r1">│</span><span class="r4"> Medium          </span><span class="r1">│</span><span class="r5">   298,638 </span><span class="r1">│</span><span class="r5"> 54.3% </span><span class="r1">│</span><span class="r5">             101.33 </span><span class="r1">│</span><span class="r5">                  8.49 </span><span class="r1">│</span>
-<span class="r1">│</span><span class="r4"> High            </span><span class="r1">│</span><span class="r5">   196,373 </span><span class="r1">│</span><span class="r5"> 35.7% </span><span class="r1">│</span><span class="r5">              87.98 </span><span class="r1">│</span><span class="r5">                  8.50 </span><span class="r1">│</span>
-<span class="r1">╰─────────────────┴───────────┴───────┴────────────────────┴───────────────────────╯</span>
-<span class="r2">Correlation with bucket order (sanity check):</span>
+<span class="r2">                                 Optimism Bucket vs. Behavior Metrics                                 </span>
+<span class="r1">╭─────────────────┬───────────┬───────┬────────────────────┬───────────────────────┬─────────────────╮</span>
+<span class="r1">│</span><span class="r3"> Optimism Bucket </span><span class="r1">│</span><span class="r3"> Customers </span><span class="r1">│</span><span class="r3"> Share </span><span class="r1">│</span><span class="r3"> Avg Loyalty Points </span><span class="r1">│</span><span class="r3"> Avg Campaign Exposure </span><span class="r1">│</span><span class="r3"> Avg Total Spent </span><span class="r1">│</span>
+<span class="r1">├─────────────────┼───────────┼───────┼────────────────────┼───────────────────────┼─────────────────┤</span>
+<span class="r1">│</span><span class="r4"> Low             </span><span class="r1">│</span><span class="r5">    54,899 </span><span class="r1">│</span><span class="r5"> 10.0% </span><span class="r1">│</span><span class="r5">             113.06 </span><span class="r1">│</span><span class="r5">                  8.50 </span><span class="r1">│</span><span class="r5">        1,097.38 </span><span class="r1">│</span>
+<span class="r1">│</span><span class="r4"> Medium          </span><span class="r1">│</span><span class="r5">   298,638 </span><span class="r1">│</span><span class="r5"> 54.3% </span><span class="r1">│</span><span class="r5">             101.33 </span><span class="r1">│</span><span class="r5">                  8.49 </span><span class="r1">│</span><span class="r5">          977.79 </span><span class="r1">│</span>
+<span class="r1">│</span><span class="r4"> High            </span><span class="r1">│</span><span class="r5">   196,373 </span><span class="r1">│</span><span class="r5"> 35.7% </span><span class="r1">│</span><span class="r5">              87.98 </span><span class="r1">│</span><span class="r5">                  8.50 </span><span class="r1">│</span><span class="r5">          838.80 </span><span class="r1">│</span>
+<span class="r1">╰─────────────────┴───────────┴───────┴────────────────────┴───────────────────────┴─────────────────╯</span>
+<span class="r2">Correlation with bucket order:</span>
   <span class="r5">•</span> loyalty_points: <span class="r6">r = </span><span class="r7">-0.107</span><span class="r6"> </span><span class="r7">(</span><span class="r6">moderate</span><span class="r7">)</span>
   <span class="r5">•</span> campaign_exposure: <span class="r1">r = </span><span class="r8">0.000</span><span class="r1"> </span><span class="r8">(</span><span class="r1">weak</span><span class="r8">)</span>
+  <span class="r5">•</span> total_spent: <span class="r6">r = </span><span class="r7">-0.129</span><span class="r6"> </span><span class="r7">(</span><span class="r6">moderate</span><span class="r7">)</span>
 </code></pre>
 </body>
 </html>

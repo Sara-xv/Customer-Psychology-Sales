@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+.r1 {color: #5a5a5a; text-decoration-color: #5a5a5a}
+.r2 {color: #a784b6; text-decoration-color: #a784b6; font-weight: bold}
+.r3 {color: #842958; text-decoration-color: #842958}
+.r4 {font-weight: bold}
+.r5 {color: #e8e8e8; text-decoration-color: #e8e8e8}
+.r6 {color: #e0a458; text-decoration-color: #e0a458; font-weight: bold}
+.r7 {color: #c44536; text-decoration-color: #c44536; font-weight: bold}
+body {
+    color: #e6e6e6;
+    background-color: #121212;
+}
+</style>
+</head>
+<body>
+    <pre style="font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><code style="font-family:inherit"><span class="r1">╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</span>
+<span class="r1">│</span>  <span class="r2">Average Order Value — Sanity Check</span>                                                                                  <span class="r1">│</span>
+<span class="r1">╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</span>
+<span class="r2">  Sanity Check: average_order_value vs.  </span>
+<span class="r2">       total_spent / total_orders        </span>
+<span class="r1">╭────────────────────┬─────────┬────────╮</span>
+<span class="r1">│</span><span class="r3"> Check              </span><span class="r1">│</span><span class="r3">   Count </span><span class="r1">│</span><span class="r3">  Share </span><span class="r1">│</span>
+<span class="r1">├────────────────────┼─────────┼────────┤</span>
+<span class="r1">│</span><span class="r4"> Total rows         </span><span class="r1">│</span><span class="r5"> 550,000 </span><span class="r1">│</span><span class="r5"> 100.0% </span><span class="r1">│</span>
+<span class="r1">│</span><span class="r4"> </span><span class="r6">Skipped (0 orders)</span><span class="r4"> </span><span class="r1">│</span><span class="r5">  35,486 </span><span class="r1">│</span><span class="r5">   6.5% </span><span class="r1">│</span>
+<span class="r1">│</span><span class="r4"> </span><span class="r2">Consistent (≤5%)</span><span class="r4">   </span><span class="r1">│</span><span class="r5"> 513,396 </span><span class="r1">│</span><span class="r5">  93.3% </span><span class="r1">│</span>
+<span class="r1">│</span><span class="r4"> </span><span class="r7">Mismatched</span><span class="r4">         </span><span class="r1">│</span><span class="r5">   1,118 </span><span class="r1">│</span><span class="r5">   0.2% </span><span class="r1">│</span>
+<span class="r1">╰────────────────────┴─────────┴────────╯</span>
+<span class="r6">                         Largest Mismatches (top 5)                          </span>
+<span class="r1">╭────────┬────────────────┬────────┬──────────────┬──────────────┬──────────╮</span>
+<span class="r1">│</span><span class="r3">     ID </span><span class="r1">│</span><span class="r3"> Reported Total </span><span class="r1">│</span><span class="r3"> Orders </span><span class="r1">│</span><span class="r3"> Reported AOV </span><span class="r1">│</span><span class="r3"> Expected AOV </span><span class="r1">│</span><span class="r3">     Diff </span><span class="r1">│</span>
+<span class="r1">├────────┼────────────────┼────────┼──────────────┼──────────────┼──────────┤</span>
+<span class="r1">│</span><span class="r5"> 486342 </span><span class="r1">│</span><span class="r5">          48.70 </span><span class="r1">│</span><span class="r5">      4 </span><span class="r1">│</span><span class="r5">    11,051.77 </span><span class="r1">│</span><span class="r5">        12.18 </span><span class="r1">│</span><span class="r5"> 90674.3% </span><span class="r1">│</span>
+<span class="r1">│</span><span class="r5"> 179052 </span><span class="r1">│</span><span class="r5">         256.69 </span><span class="r1">│</span><span class="r5">     13 </span><span class="r1">│</span><span class="r5">    13,536.66 </span><span class="r1">│</span><span class="r5">        19.75 </span><span class="r1">│</span><span class="r5"> 68456.1% </span><span class="r1">│</span>
+<span class="r1">│</span><span class="r5"> 250574 </span><span class="r1">│</span><span class="r5">         106.80 </span><span class="r1">│</span><span class="r5">      5 </span><span class="r1">│</span><span class="r5">    13,400.78 </span><span class="r1">│</span><span class="r5">        21.36 </span><span class="r1">│</span><span class="r5"> 62637.7% </span><span class="r1">│</span>
+<span class="r1">│</span><span class="r5"> 391005 </span><span class="r1">│</span><span class="r5">          20.00 </span><span class="r1">│</span><span class="r5">      2 </span><span class="r1">│</span><span class="r5">     6,159.98 </span><span class="r1">│</span><span class="r5">        10.00 </span><span class="r1">│</span><span class="r5"> 61499.8% </span><span class="r1">│</span>
+<span class="r1">│</span><span class="r5"> 608771 </span><span class="r1">│</span><span class="r5">         147.33 </span><span class="r1">│</span><span class="r5">      7 </span><span class="r1">│</span><span class="r5">    10,630.36 </span><span class="r1">│</span><span class="r5">        21.05 </span><span class="r1">│</span><span class="r5"> 50407.4% </span><span class="r1">│</span>
+<span class="r1">╰────────┴────────────────┴────────┴──────────────┴──────────────┴──────────╯</span>
+</code></pre>
+</body>
+</html>
