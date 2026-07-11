@@ -1,3 +1,6 @@
+We have READ.md in both English and Persian
+First Persian secend English
+
 # 🧠 تحلیل رفتار مشتری بر اساس عوامل روانشناختی و فروش
 
 > پروژه‌ای کامل از دریافت داده تا ساخت اپلیکیشن هوش مصنوعی — بر پایه بیش از **۵۵۰٬۰۰۰ رکورد** رفتار مشتری
@@ -264,3 +267,273 @@ streamlit run app.py
 - Box-Cox transform برای ستون‌هایی با skew بالای ۱۰ مؤثرتر از log-transform است
 
   ### میتوانید برای نمونه برنامه (به پی دی اف Customer Loyalty Advisor نگاه کنید.)
+
+
+**✅ Here is the full English translation of your README:**
+
+---
+
+# 🧠 Customer Behavior Analysis Based on Psychological Factors and Sales
+
+> A complete project from data ingestion to building an AI application — based on over **550,000 customer behavior records**
+
+---
+
+## 📌 Project Introduction
+
+In this project, a simulated dataset with over **550,000 records** of customer behavior was created and analyzed. The main goal is to examine the relationship between **individuals’ psychological traits, digital behavior, marketing interactions, and purchasing patterns**.
+
+The project was executed with a data analyst’s approach and covers the full cycle of a Data Analytics project — from raw data to building interactive dashboards and a machine learning-powered application.
+
+---
+
+## 🎯 Project Scenario
+
+Imagine an online company selling products in the fields of personal development, mental health, and personalized training. The company wants to better understand its customers’ behavior.
+
+They want to know:
+
+- Which psychological factors drive increased customer purchases?
+- Which customer groups are more valuable?
+- What factors lead to customer retention and repeat purchases?
+- How can we predict customers’ future buying behavior?
+
+---
+
+## 🎯 Project Objectives
+
+- Analyze customer purchasing behavior
+- Examine the impact of psychological factors on sales
+- Identify hidden patterns in the data
+- Assess data quality and perform cleaning
+- Prepare data for analytical and machine learning models
+- Build a practical tool to present analysis results
+
+---
+
+## 📂 Dataset
+
+The dataset contains **549,910 records** and **21 features**, covering customer information in four main categories:
+
+### Demographic Information
+| Column              | Description                  |
+|---------------------|------------------------------|
+| `age`               | Customer age (18–75 years)   |
+| `gender`            | Gender                       |
+| `city`              | City of residence            |
+| `education_level`   | Education level              |
+| `occupation`        | Occupation                   |
+
+### Psychological Features
+| Column                    | Type     | Description                          |
+|---------------------------|----------|--------------------------------------|
+| `stress_level`            | Negative | Stress level (0–10)                  |
+| `anxiety_score`           | Negative | Anxiety score (0–10)                 |
+| `self_esteem`             | Positive | Self-esteem (0–10)                   |
+| `optimism_score`          | Positive | Optimism score (0–10)                |
+| `life_satisfaction`       | Positive | Life satisfaction (0–10)             |
+| `social_media_dependency` | Negative | Social media dependency (0–10)       |
+| `impulsiveness`           | Negative | Impulsiveness (0–10)                 |
+
+### Digital Behavior & Marketing
+| Column                | Description                              |
+|-----------------------|------------------------------------------|
+| `weekly_site_visits`  | Weekly website visits                    |
+| `campaign_exposure`   | Exposure to advertising campaigns        |
+
+### Sales Information
+| Column                     | Description                        |
+|----------------------------|------------------------------------|
+| `total_orders`             | Total number of orders             |
+| `average_order_value`      | Average value per order            |
+| `total_spent`              | Total amount spent                 |
+| `loyalty_points`           | Loyalty points                     |
+| `monthly_purchase_amount`  | Monthly purchase amount            |
+| `discount_received`        | Total discount received            |
+
+---
+
+## 🗂️ Project Structure
+
+```
+📦 project/
+├── 📓 Understanding_and_Cleaning.ipynb   ← Phase 1: Data Understanding & Cleaning
+├── 📓 i.ipynb                            ← Phase 2: Analysis & Modeling
+├── 🐍 app.py                             ← Streamlit Application
+├── 🐍 Loyalty_model.py                   ← Model Engine (LoyaltyEngine)
+├── 📁 classes/
+│   ├── data_info_display.py              ← Dataset overview display
+│   ├── missing_values_analyzer.py        ← Missing values analysis
+│   └── outlier_detector.py               ← Outlier detection & handling
+├── 📁 models/                            ← Saved models (joblib)
+├── 📁 Report/                            ← HTML/SVG reports
+├── 📄 psychology_sales_dataset.csv       ← Raw dataset
+└── 📄 data_cleaned.csv                   ← Cleaned dataset
+```
+
+---
+
+## 🔄 Project Phases
+
+### Phase 1 — Data Understanding & Cleaning (`Understanding_and_Cleaning.ipynb`)
+
+#### 1.1 Initial Data Exploration
+- Display general dataset information using `DataInfoDisplay` class
+- Check data types, null values, and descriptive statistics
+
+#### 1.2 Data Integrity Check (Sanity Check)
+- Function `check_aov_consistency` validates `average_order_value`
+- Formula: `AOV = total_spent / total_orders`
+- Rows with >5% discrepancy are flagged as mismatches
+
+#### 1.3 Missing Values Handling
+Using `MissingValuesAnalyzer` class:
+
+| Step                          | Method                                      |
+|-------------------------------|---------------------------------------------|
+| Rows with ≥3 missing values   | Complete row deletion                       |
+| `anxiety_score`               | Linear regression (using stress, optimism, life satisfaction) |
+| `self_esteem`                 | Linear regression (using stress, life satisfaction, optimism) |
+| Remaining missing values      | Filled with median                          |
+
+#### 1.4 Outlier Handling
+Using `OutlierDetector` class:
+
+| Column                  | Issue              | Solution                  |
+|-------------------------|--------------------|---------------------------|
+| `weekly_site_visits`    | Skew = +11.37      | Box-Cox transformation    |
+| `average_order_value`   | Skew = +23.49      | Box-Cox transformation    |
+| `total_spent`           | Minor outliers     | Winsorizing (IQR)         |
+| `loyalty_points`        | Minor outliers     | Winsorizing (IQR)         |
+| `anxiety_score`, `age`  | False positives    | Left untouched            |
+
+> **Result:** All skewness reduced to the range (-1, +1).
+
+#### 1.5 Feature Engineering
+- `Age_Group`: Age grouping (18–25, 26–30, ...)
+- `discount_rate`: Discount rate = `discount_received / total_spent` — price sensitivity indicator
+
+---
+
+### Phase 2 — Analysis & Modeling (`i.ipynb`)
+
+#### 2.1 Descriptive Statistics
+- Function `show_descriptive_stats`: Displays count, min, max, mean, median for psychological and financial features using colored Rich tables
+
+#### 2.2 Demographic Distribution
+- Function `show_value_counts`: Distribution of Age_Group, gender, city, education, and occupation
+
+#### 2.3 Customer Segmentation (RFM-style)
+Using `calculate_rfm_scores`, customers are divided into 6 segments:
+
+| Segment                  | Color     | Description                     |
+|--------------------------|-----------|---------------------------------|
+| 🟢 Champions            | Green     | High purchase + high spend      |
+| 🟩 Loyal Customers       | Light Green | Frequent buyers               |
+| 🔵 Big Spenders          | Blue      | High spend, fewer purchases     |
+| 🟡 Potential Loyalists   | Yellow    | Growth potential                |
+| ⚫ Regular Customers     | Gray      | Average behavior                |
+| 🔴 At Risk / Low Value   | Red       | Low spend and low frequency     |
+
+#### 2.4 Psychological Profile by Segment
+- Function `show_psych_analysis`: Comparison of average psychological traits across segments
+- Color coding: Green = better, Red = worse (based on feature polarity)
+
+#### 2.5 Modeling — LoyaltyEngine
+A **Gradient Boosting** model was trained:
+- **Classification target**: Predict customer segment
+- **Regression target**: Predict `total_spent`
+- **Features**: 7 psychological traits
+- **Outputs**: Segment, Champion probability, expected spend, probability for all segments
+
+---
+
+### Phase 3 — Application (`app.py`)
+
+**Customer Loyalty Advisor** — A Streamlit web application.
+
+#### Input
+7 sliders in the sidebar for psychological scores (0–10):
+- 😰 Stress Level · 😟 Anxiety Score · 💪 Self Esteem
+- ⚡ Impulsiveness · 🌟 Optimism · 😊 Life Satisfaction · 📱 Social Media Dependency
+
+#### Outputs
+
+**Key Metrics (4 Cards):**
+- Predicted Segment
+- Champion Probability
+- Expected Total Spend
+- Large Gaps vs Champions
+
+**Visualizations:**
+- Radar Chart: Customer’s psychological profile vs average Champions
+- Bar Chart: Probability of belonging to each segment
+
+**Feature Gap Analysis:**
+- Table showing gaps for each trait compared to Champions
+- Status: ✅ On track / ⚠️ Moderate gap / 🔴 Large concern
+
+**Personalized Retention Recommendations:**
+- Tailored strategies based on customer weaknesses
+- Example: High anxiety → Emphasize money-back guarantee, customer testimonials, and easy support
+
+---
+
+## 🧩 Helper Classes (`classes/`)
+
+### `DataInfoDisplay`
+Displays general dataset information using Rich tables — shape, dtypes, null counts, sample rows.
+
+### `MissingValuesAnalyzer`
+Comprehensive missing values analysis:
+- Overall and per-column statistical reports
+- Color coding by severity: Yellow → Orange → Red
+- Scientific suggestions (MICE, KNN, median, regression)
+- Identifies rows with ≥3 missing values for deletion
+- Export to CSV
+
+### `OutlierDetector`
+Detection, reporting, visualization, and handling of outliers using multiple methods:
+- IQR, Z-Score, Modified Z-Score, Isolation Forest
+- **Smart feature**: Automatically detects skewness and warns about possible false positives in skewed distributions
+
+---
+
+## 🛠️ Installation & Execution
+
+### Prerequisites
+
+```bash
+pip install pandas numpy scikit-learn scipy rich matplotlib seaborn streamlit plotly joblib
+```
+
+### Running Notebooks
+
+```bash
+jupyter notebook Understanding_and_Cleaning.ipynb
+jupyter notebook i.ipynb
+```
+
+### Running the Application
+
+```bash
+streamlit run app.py
+```
+
+> **Note:** The model must be trained and saved in the `models/` folder before running the app.
+
+---
+
+## 📊 Key Results
+
+- `optimism_score` and `self_esteem` show the strongest positive correlation with purchasing behavior
+- **Champions** segment has significantly lower anxiety and higher optimism compared to other segments
+- **Gradient Boosting** model can predict customer segments with acceptable accuracy using only 7 psychological features
+- Box-Cox transformation proved more effective than log-transform for columns with very high skewness (>10)
+
+---
+
+**Sample Application:**  
+You can view the **Customer Loyalty Advisor** PDF for a visual example of the final application.
+
+ 
