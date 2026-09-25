@@ -269,7 +269,7 @@ streamlit run app.py
   ### میتوانید برای نمونه برنامه (به پی دی اف Customer Loyalty Advisor نگاه کنید.)
 
 
-**✅ Here is the full English translation of your README:**
+
 
 ---
 
