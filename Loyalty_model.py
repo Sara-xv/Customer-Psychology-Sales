@@ -26,6 +26,16 @@ PSYCH_FEATURES = [
     "stress_level", "anxiety_score", "self_esteem", "impulsiveness",
     "optimism_score", "life_satisfaction", "social_media_dependency",
 ]
+
+# Direction is based on the ACTUAL correlation each feature has with purchase
+# behavior in this dataset (see Report/ and EDA.ipynb), not on general
+# psychological connotation. Champions score LOWER on self_esteem, optimism,
+# and life_satisfaction — and HIGHER on stress and anxiety — than At Risk /
+# Low Value customers (see Report/top_vs_bottom_spenders_profile.png).
+# "POSITIVE_FEATS" = higher score is associated with HIGHER spend.
+# "NEGATIVE_FEATS" = higher score is associated with LOWER spend.
+POSITIVE_FEATS = ["stress_level", "anxiety_score", "social_media_dependency"]
+NEGATIVE_FEATS = ["self_esteem", "optimism_score", "life_satisfaction"]
  
 SEGMENT_COLORS = {
     "Champions":           "#4CAF50",
@@ -87,6 +97,14 @@ def _build_rfm_segments(data: pd.DataFrame) -> pd.DataFrame:
 # Each rule: (feature, direction, threshold, tag, recommendation text)
 # "high" → triggers when feature > threshold
 # "low"  → triggers when feature < threshold
+#
+# NOTE on self_esteem / optimism_score / life_satisfaction:
+# In this dataset these correlate NEGATIVELY with spend — high scorers spend
+# LESS, not more (see NEGATIVE_FEATS above and Report/spend_tier_vs_psych.html).
+# So a "low" score on these is not a weakness to compensate for; it is
+# actually associated with a HIGHER-value customer. The rules below trigger
+# on "high" self_esteem/optimism/life_satisfaction instead, since THAT is the
+# segment that, per the data, needs a different approach to keep spending up.
 RULES: list[tuple[str, str, float, str, str]] = [
     ("stress_level", "high", 6.5, "Stress Management",
      "High stress detected. Use simple, low-friction promotions (direct discount codes) "
@@ -108,21 +126,25 @@ RULES: list[tuple[str, str, float, str, str]] = [
      "High social media dependency. Shift engagement to Instagram/Telegram. "
      "User-generated content (UGC) and peer reviews have outsized influence."),
  
-    ("self_esteem", "low", 4.0, "Status & Identity",
-     "Low self-esteem detected. Connect the brand to personal identity and values. "
-     "VIP status tiers and exclusive member perks are particularly effective."),
+    ("self_esteem", "high", 6.5, "Status & Identity",
+     "High self-esteem, lower price-sensitivity signal. Connect the brand to personal "
+     "identity and values rather than discounts. VIP status tiers and exclusive member "
+     "perks are particularly effective at sustaining engagement with this profile."),
  
-    ("optimism_score", "low", 4.0, "Social Proof",
-     "Low optimism. Lead with real customer success stories and tangible results "
-     "rather than aspirational messaging."),
+    ("optimism_score", "high", 7.0, "Grounded Messaging",
+     "High optimism, historically a lower-spend profile in this dataset. Lead with "
+     "concrete, real customer success stories and tangible results rather than purely "
+     "aspirational messaging to keep this segment engaged."),
  
-    ("life_satisfaction", "low", 4.0, "Experiential Products",
-     "Low life satisfaction. Experiential offerings (travel, education, entertainment) "
-     "outperform material products. Frame purchases as life improvements."),
+    ("life_satisfaction", "high", 7.0, "Experiential Products",
+     "High life satisfaction, historically a lower-spend profile in this dataset. "
+     "Experiential offerings (travel, education, entertainment) framed as enhancing an "
+     "already-good life may outperform generic material-product messaging."),
  
-    ("optimism_score", "high", 7.0, "Loyalty Programs",
-     "High optimism. This customer is receptive to long-term loyalty programs, "
-     "subscriptions, and tiered membership structures."),
+    ("optimism_score", "low", 3.5, "Loyalty Programs",
+     "Lower optimism, historically a higher-spend profile in this dataset. This customer "
+     "is receptive to long-term loyalty programs, subscriptions, and tiered membership "
+     "structures that reward continued engagement."),
 ]
  
 SEGMENT_STRATEGIES: dict[str, str] = {
@@ -225,13 +247,6 @@ class LoyaltyModelTrainer:
         self.regressor.fit(X_tr, yr_tr)
         r2 = r2_score(yr_te, self.regressor.predict(X_te))
  
-        # ── Per-segment accuracy table ────────────────────────────────────────
-        report = classification_report(
-            yc_te, self.classifier.predict(X_te),
-            target_names=self.le.classes_, output_dict=True,
-        )
-        macro = report["macro avg"]
- 
         perf = Table(
             title="Model Performance", box=ROUNDED,
             title_style=f"bold {ACCENT}", header_style=HEADER, border_style=BORDER,
@@ -307,15 +322,22 @@ class LoyaltyEngine:
             if hit:
                 recs.append(f"[{tag}] {text}")
  
-        # 3) Gap analysis — biggest distance from Champions profile
-        pos_feats = ["self_esteem", "optimism_score", "life_satisfaction"]
-        gaps      = {f: self.champions_profile.get(f, 5.0) - profile.get(f, 5.0)
-                     for f in pos_feats}
-        top_gap   = max(pos_feats, key=lambda f: gaps[f])
+        # 3) Gap analysis — biggest distance from Champions profile, in the
+        # direction that matters for spend (see POSITIVE_FEATS/NEGATIVE_FEATS
+        # above). For POSITIVE_FEATS, being BELOW Champions is the gap to flag.
+        # For NEGATIVE_FEATS, being ABOVE Champions is the gap to flag.
+        gaps: dict[str, float] = {}
+        for f in POSITIVE_FEATS:
+            gaps[f] = self.champions_profile.get(f, 5.0) - profile.get(f, 5.0)
+        for f in NEGATIVE_FEATS:
+            gaps[f] = profile.get(f, 5.0) - self.champions_profile.get(f, 5.0)
+
+        top_gap = max(gaps, key=lambda f: gaps[f])
         if gaps[top_gap] > 1.5:
             recs.append(
                 f"[Gap Analysis] '{top_gap.replace('_', ' ').title()}' is "
-                f"{gaps[top_gap]:.1f} pts below the Champions average. "
+                f"{gaps[top_gap]:.1f} pts off the Champions average, in the direction "
+                f"associated with lower spend in this dataset. "
                 f"Messaging that compensates for this deficit will outperform generic campaigns."
             )
  
@@ -352,4 +374,3 @@ class LoyaltyEngine:
             "expected_spend":  round(exp_spend, 2),
             "recommendations": self._recommendations(profile, segment),
         }
- 
