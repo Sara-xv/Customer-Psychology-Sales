@@ -261,15 +261,17 @@ streamlit run app.py
 
 ## 📊 نتایج کلیدی
 
-- ویژگی‌های `optimism_score` و `self_esteem` بیشترین همبستگی مثبت را با خرید دارند
-- مشتریان سگمنت **Champions** به طور میانگین اضطراب کمتر و خوش‌بینی بیشتری نسبت به سایر سگمنت‌ها دارند
-- **Gradient Boosting** با ۷ ویژگی روانشناختی قادر است سگمنت مشتری را با دقت قابل قبول پیش‌بینی کند
-- Box-Cox transform برای ستون‌هایی با skew بالای ۱۰ مؤثرتر از log-transform است
+- برخلاف فرض اولیه، ویژگی‌های «منفی» همبستگی مثبت با خرج کردن نشان دادند: `stress_level` (r=۰.۱۹ با total_spent، r=۰.۴۰ با AOV) و `anxiety_score` (r=۰.۱۶ با total_spent، r=۰.۳۴ با AOV)
+- `life_satisfaction` قوی‌ترین همبستگی را نشان داد، اما **منفی** (r=-۰.۴۶ با monthly_purchase_amount)؛ `optimism_score` و `self_esteem` نیز همبستگی منفی (نه مثبت) با هزینه و امتیاز وفاداری داشتند
+- `impulsiveness` عملاً هیچ ارتباطی با رفتار خرید نداشت (r ≈ ۰ در همه معیارها)
+- مدل **HistGradientBoosting** با استفاده از فقط ۷ ویژگی روانشناختی به Accuracy ≈ ۵۰٪ و Macro F1 ≈ ۰.۲۰ در پیش‌بینی سگمنت (۶ کلاسه) و R² ≈ ۰.۳۲ در پیش‌بینی total_spent رسید؛ مدل عملاً فقط دو سگمنت (Champions و At Risk/Low Value) را با دقت قابل قبول تشخیص می‌دهد
+- تحلیل Feature Importance نشان داد وقتی فیچرهای رفتاری (Discount Rate، Social Media Dependency) هم در مدل حضور دارند، تقریباً تمام قدرت پیش‌بینی را جذب می‌کنند و سهم فیچرهای روانشناختی دیگر ناچیز می‌شود — یعنی محدودیت دقت مدل روانشناسی-محور، محدودیت واقعی و قابل توضیح است، نه یک باگ
+- Box-Cox transform برای ستون‌هایی با skew بالای ۱۰ مؤثرتر از log-transform بود
 
   ### میتوانید برای نمونه برنامه (به پی دی اف Customer Loyalty Advisor نگاه کنید.)
 
 
-**✅ Here is the full English translation of your README:**
+
 
 ---
 
@@ -526,14 +528,14 @@ streamlit run app.py
 
 ## 📊 Key Results
 
-- `optimism_score` and `self_esteem` show the strongest positive correlation with purchasing behavior
-- **Champions** segment has significantly lower anxiety and higher optimism compared to other segments
-- **Gradient Boosting** model can predict customer segments with acceptable accuracy using only 7 psychological features
+- Contrary to the initial hypothesis, "negative" traits correlated *positively* with spend: `stress_level` (r=0.19 with total_spent, r=0.40 with AOV) and `anxiety_score` (r=0.16 with total_spent, r=0.34 with AOV)
+- `life_satisfaction` showed the strongest correlation of all — but **negative** (r=-0.46 with monthly_purchase_amount); `optimism_score` and `self_esteem` also correlated negatively (not positively) with spend and loyalty points
+- `impulsiveness` showed essentially no relationship with purchase behavior (r ≈ 0 across all metrics)
+- The **HistGradientBoosting** model, trained on the 7 psychological features alone, reached ~50% accuracy and ~0.20 macro-F1 on 6-class segment prediction, and R²≈0.32 on spend prediction; it reliably distinguishes only two segments (Champions and At Risk/Low Value)
+- Feature-importance analysis showed that when behavioral features (Discount Rate, Social Media Dependency) are included, they absorb nearly all predictive power, leaving the other psychological features with negligible importance — meaning the psychology-only model's limited accuracy is an explainable, real constraint rather than a modeling bug
 - Box-Cox transformation proved more effective than log-transform for columns with very high skewness (>10)
 
 ---
 
 **Sample Application:**  
 You can view the **Customer Loyalty Advisor** PDF for a visual example of the final application.
-
- 
