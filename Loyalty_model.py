@@ -218,14 +218,17 @@ class LoyaltyModelTrainer:
         )
  
     def train(self, save_path: str | None = None) -> dict:
-        X       = self.data[PSYCH_FEATURES]
-        X_sc    = self.scaler.fit_transform(X)
-        y_cls   = self.le.fit_transform(self.data["Customer_Segment"])
-        y_reg   = self.data["total_spent"].values
- 
+        X     = self.data[PSYCH_FEATURES]
+        y_cls = self.le.fit_transform(self.data["Customer_Segment"])
+        y_reg = self.data["total_spent"].values
+
+        # Split BEFORE scaling to avoid data leakage —
+        # scaler must see only training data, not test data.
         X_tr, X_te, yc_tr, yc_te, yr_tr, yr_te = train_test_split(
-            X_sc, y_cls, y_reg, test_size=0.2, random_state=42,
+            X, y_cls, y_reg, test_size=0.2, random_state=42,
         )
+        X_tr = self.scaler.fit_transform(X_tr)
+        X_te = self.scaler.transform(X_te)
  
         self.console.print(Panel(
             f"[bold {ACCENT}]Training Customer Loyalty Models[/bold {ACCENT}]",

@@ -111,8 +111,8 @@ FEATURE_META = {
     "social_media_dependency": ("📱", "Social Media Dependency", "Higher = more dependent"),
 }
 
-NEGATIVE_FEATS = {"self_esteem", "optimism_score", "life_satisfaction"}
-POSITIVE_FEATS = {"stress_level", "anxiety_score", "social_media_dependency"}
+NEGATIVE_FEATS = {"stress_level", "anxiety_score", "social_media_dependency"}
+POSITIVE_FEATS = {"self_esteem", "optimism_score", "life_satisfaction"}
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Sidebar — Input form
