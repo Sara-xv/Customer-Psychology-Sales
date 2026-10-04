@@ -1,5 +1,6 @@
-We have READ.md in both English and Persian
-First Persian secend English
+We have README.md in both English and Persian
+First Persian  
+Second English
 
 # 🧠 تحلیل رفتار مشتری بر اساس عوامل روانشناختی و فروش
 
